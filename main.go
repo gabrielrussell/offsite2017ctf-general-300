@@ -58,24 +58,47 @@ func main() {
 		Window:    window.Bartlett,
 		NFFT:      4096,
 	}
-	
-	num:=0
+
+	m := map[int]uint{
+		1600: 5,
+		2400: 4,
+		3000: 3,
+		3800: 2,
+		4600: 1,
+		5400: 0,
+	}
+	num := 0
+	allNums := map[int]int{}
+	chars := []int{}
+	allChars := map[int]int{}
 	for c := range clipChan {
-	    	
 		p, f := spectral.Pwelch(c, 44100, pwelchOpt)
+		p = p[20:]
+		f = f[20:]
+		maxPower := float64(0)
 		for i := range p {
-			if i < 20 {
-				continue
+			if p[i] > maxPower {
+				maxPower = p[i]
 			}
-			p[i] *= float64(44100)
-			//if p[i] > 20 {
-			//	fmt.Printf("%v, ", f)
-			//}
-			//fmt.Printf("\n")
 		}
-		graph(fmt.Sprintf("img_%v.png",num),p[20:],f[20:])
+		ch := 0
+		for i := range p {
+			p[i] /= maxPower
+			if p[i] > 0.7 {
+				i := (int(f[i]+50) / 100) * 100
+				allNums[i]++
+				ch |= 1 << m[i]
+				//fmt.Printf("%v, ", i)
+				//fmt.Printf("%v:%v, ",f[i],p[i])
+			}
+		}
+		allChars[ch]++
+		chars = append(chars,ch)
 		num++
 	}
+	fmt.Printf("%v", allChars)
+	fmt.Printf("%v", allNums)
+	fmt.Printf("\n")
 }
 
 func graph(fn string, x []float64, y []float64) {

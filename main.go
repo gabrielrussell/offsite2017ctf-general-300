@@ -68,9 +68,8 @@ func main() {
 		5400: 0,
 	}
 	num := 0
-	allNums := map[int]int{}
 	chars := []int{}
-	allChars := map[int]int{}
+	allChars := make([]int, 64)
 	for c := range clipChan {
 		p, f := spectral.Pwelch(c, 44100, pwelchOpt)
 		p = p[20:]
@@ -84,21 +83,28 @@ func main() {
 		ch := 0
 		for i := range p {
 			p[i] /= maxPower
-			if p[i] > 0.7 {
+			if p[i] > 0.3 {
 				i := (int(f[i]+50) / 100) * 100
-				allNums[i]++
-				ch |= 1 << m[i]
-				//fmt.Printf("%v, ", i)
-				//fmt.Printf("%v:%v, ",f[i],p[i])
+				v, ok := m[i]
+				if !ok {
+					panic("unmapped frequency")
+				}
+				ch |= 1 << v
 			}
 		}
 		allChars[ch]++
-		chars = append(chars,ch)
+		chars = append(chars, ch)
 		num++
 	}
 	fmt.Printf("%v", allChars)
-	fmt.Printf("%v", allNums)
 	fmt.Printf("\n")
+	for _, c := range chars {
+		if c == 41 {
+			fmt.Printf(" ")
+		} else {
+			fmt.Printf("%c", c+82)
+		}
+	}
 }
 
 func graph(fn string, x []float64, y []float64) {

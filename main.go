@@ -69,7 +69,6 @@ func main() {
 	}
 	num := 0
 	chars := []int{}
-	allChars := make([]int, 64)
 	for c := range clipChan {
 		p, f := spectral.Pwelch(c, 44100, pwelchOpt)
 		p = p[20:]
@@ -92,12 +91,9 @@ func main() {
 				ch |= 1 << v
 			}
 		}
-		allChars[ch]++
 		chars = append(chars, ch)
 		num++
 	}
-	fmt.Printf("%v", allChars)
-	fmt.Printf("\n")
 	for _, c := range chars {
 		if c == 41 {
 			fmt.Printf(" ")
@@ -105,18 +101,19 @@ func main() {
 			fmt.Printf("%c", c+82)
 		}
 	}
+	fmt.Printf("\n")
 }
 
 func graph(fn string, x []float64, y []float64) {
 	graph := chart.Chart{
 		XAxis: chart.XAxis{
 			Style: chart.Style{
-				Show: true, //enables / displays the x-axis
+				Show: true,
 			},
 		},
 		YAxis: chart.YAxis{
 			Style: chart.Style{
-				Show: true, //enables / displays the y-axis
+				Show: true,
 			},
 		},
 		Series: []chart.Series{
